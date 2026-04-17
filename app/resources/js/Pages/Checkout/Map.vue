@@ -90,7 +90,7 @@ import { usePage } from "@inertiajs/vue3";
 import { Dialog, DialogPanel, TransitionChild, TransitionRoot } from "@headlessui/vue";
 import { XMarkIcon } from "@heroicons/vue/24/outline";
 
-import { Loader } from "@googlemaps/js-api-loader";
+import { setOptions, importLibrary } from "@googlemaps/js-api-loader";
 import { MarkerClusterer } from "@googlemaps/markerclusterer";
 
 const props = defineProps({
@@ -174,6 +174,11 @@ const selectedPoint = ref(null);
 const selectedPointService = ref(null);
 
 const apiKey = import.meta.env.VITE_GOOGLEMAPS_API_KEY;
+setOptions({
+    key: apiKey,
+    v: 'weekly',
+});
+
 const options = ref({
     zoom: mapZoom,
     maxZoom: mapMaxZoom,
@@ -294,16 +299,8 @@ const setMapCenter = (panTo = true) => {
     mapInstance.setCenter(center);
 };
 
-const initializeLoader = () => {
-    return new Loader({
-        apiKey,
-        version: 'weekly',
-    });
-};
-
 const initializeMap = async () => {
-    const loader = initializeLoader();
-    const { Map } = await loader.importLibrary('maps');
+    const { Map } = await importLibrary('maps');
     mapInstance = new Map(mapContainer.value, options.value);
 
     mapInstance.addListener('idle', async () => {
@@ -315,7 +312,7 @@ const initializeMap = async () => {
 };
 
 const renderMarkers = async () => {
-    const { AdvancedMarkerElement } = await initializeLoader().importLibrary("marker");
+    const { AdvancedMarkerElement } = await importLibrary("marker");
     const clusterMarkers = [];
 
     for (const item of points) {
@@ -436,8 +433,7 @@ const getMapBounds = () => {
 };
 
 const getPlacesApiClient = async () => {
-    const loader = initializeLoader();
-    return await loader.importLibrary('places');
+    return await importLibrary('places');
 };
 
 const loadSuggestions = async (input) => {
@@ -508,7 +504,7 @@ const setMarker = async (position) => {
         return;
     }
 
-    const { AdvancedMarkerElement } = await initializeLoader().importLibrary("marker");
+    const { AdvancedMarkerElement } = await importLibrary("marker");
     marker = new AdvancedMarkerElement({
         position: position,
         map: mapInstance
