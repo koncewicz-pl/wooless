@@ -324,10 +324,11 @@ const renderMarkers = async () => {
 
         const marker = new AdvancedMarkerElement({
             position: { lat: item.coordinates.latitude, lng: item.coordinates.longitude },
-            content: content
+            content: content,
+            gmpClickable: true
         });
 
-        marker.addListener('click', () => {
+        marker.addListener('gmp-click', () => {
             let value = item;
             mapCenterIsSet = false;
 
