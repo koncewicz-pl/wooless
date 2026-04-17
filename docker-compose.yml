@@ -1,0 +1,74 @@
+services:
+  app:
+    container_name: wooless-app
+    image: wooless-app
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+    environment:
+      APP_USER:
+      WWWUSER:
+      WWWGROUP:
+    ports:
+      - '443:443'
+    volumes:
+      - ./app:/var/www/
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - wooless
+
+  wordpress-app:
+    container_name: wooless-wordpress-app
+    image: wooless-wordpress-app
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+    environment:
+      APP_USER:
+      WWWUSER:
+      WWWGROUP:
+    volumes:
+      - ./wordpress:/var/www/
+    depends_on:
+      wordpress-mariadb:
+        condition: service_healthy
+    networks:
+      - wooless
+
+  wordpress-mariadb:
+    container_name: wooless-wordpress-mariadb
+    image: mariadb:11
+    restart: always
+    command: --skip-log-bin
+    healthcheck:
+      test: healthcheck.sh --connect
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: wooless
+      MYSQL_USER: wooless
+      MYSQL_PASSWORD: secret
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - wooless
+
+networks:
+  wooless:
+    external: true
+
+volumes:
+  mariadb_data:
+  caddy_data:
+  caddy_config:

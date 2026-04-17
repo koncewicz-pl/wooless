@@ -11,10 +11,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->trustProxies(at: '*');
+
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
-            \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
-            \App\Http\Middleware\UpgradeToHttpsUnderNgrok::class,
+            \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class
         ], prepend: [
             \App\Http\Middleware\SetLocale::class,
         ]);

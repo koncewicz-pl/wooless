@@ -44,7 +44,7 @@ use Inertia\Response;
                 options: [
                     'headers' => [
                         'Authorization' => 'Basic ' . base64_encode(
-                            string: env('WORDPRESS_WC_CUSTOMER_KEY') . ':' . env('WORDPRESS_WC_CUSTOMER_SECRET')
+                            string: config('services.wordpress.wc_key') . ':' . config('services.wordpress.wc_secret')
                         ),
                     ],
                     'json' => [

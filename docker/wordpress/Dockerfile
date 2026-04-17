@@ -1,20 +1,42 @@
-FROM wordpress:6.9.0-php8.5-fpm
+FROM composer:2 AS composer
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
+FROM dunglas/frankenphp:1.9.1-php8.4.14
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    nano \
     supervisor \
-    nginx
+    cron \
+    zip \
+    unzip \
+    less \
+  && rm -rf /var/lib/apt/lists/*
 
-# Install WP-CLI
-RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
-    chmod +x wp-cli.phar && \
-    mv wp-cli.phar /usr/local/bin/wp
+RUN install-php-extensions \
+    gd \
+    imagick \
+    exif \
+    intl \
+    mysqli \
+    pdo \
+    pdo_mysql \
+    opcache \
+    redis \
+    zip
 
-COPY nginx.conf /etc/nginx/sites-enabled/default
+COPY php.ini $PHP_INI_DIR/conf.d/99-custom.ini
+
+COPY --from=composer /usr/bin/composer /usr/bin/composer
+
+RUN groupadd -g 1000 koncewicz \
+ && useradd -m -s /bin/bash -u 1000 -g 1000 koncewicz
+
+RUN echo "* * * * * su -s /bin/bash -c 'cd /var/www && /usr/local/bin/php vendor/wp-cli/wp-cli/php/boot-fs.php cron event run --due-now' koncewicz >> /proc/1/fd/1 2>/proc/1/fd/2" | crontab -
+
+WORKDIR /var/www
+
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+COPY start-container /usr/local/bin/start-container
+RUN chmod +x /usr/local/bin/start-container
 
-ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["php-fpm"]
+ENTRYPOINT ["/usr/local/bin/start-container"]

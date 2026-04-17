@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+# remap only app user/group
+groupmod -o -g "$WWWGROUP" "$APP_USER" 2>/dev/null
+usermod  -o -u "$WWWUSER"  "$APP_USER" 2>/dev/null
+
+# Caddy dirs writable
+mkdir -p /data/caddy /config/caddy
+chown -R "$APP_USER":"$APP_USER" /data /config
+chmod -R 775 /data /config
+
+# Signal that init is done
+touch /tmp/container-ready
+
+exec /usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord.conf

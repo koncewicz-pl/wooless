@@ -45,7 +45,7 @@ use Inertia\Response;
                 uri: 'wc/v3/orders',
                 options: [
                     'headers' => [
-                        'Authorization' => 'Basic ' . base64_encode(env('WORDPRESS_WC_CUSTOMER_KEY') . ':' . env('WORDPRESS_WC_CUSTOMER_SECRET'))
+                        'Authorization' => 'Basic ' . base64_encode(config('services.wordpress.wc_key') . ':' . config('services.wordpress.wc_secret'))
                     ],
                     'query' => [
                         'customer' => $this->auth->customerId(),

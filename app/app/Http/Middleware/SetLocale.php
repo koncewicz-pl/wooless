@@ -12,15 +12,13 @@ class SetLocale
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->get('lang')) {
+        $lang = $request->query('lang');
+
+        if (!$lang || !in_array($lang, ['en', 'pl'])) {
             return $next($request);
         }
 
-        if (!in_array($request->get('lang'), ['en', 'pl'])) {
-            return $next($request);
-        }
-
-        App::setLocale($request->get('lang'));
+        App::setLocale($lang);
 
         return $next($request);
     }

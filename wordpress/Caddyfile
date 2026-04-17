@@ -1,0 +1,60 @@
+{
+	frankenphp
+	order php before file_server
+}
+
+localhost:8201, wooless-wordpress-app:8201 {
+	tls internal
+
+	redir /wordpress/wp/wp-admin /wordpress/wp/wp-admin/ 301
+
+	handle /wordpress/* {
+		uri strip_prefix /wordpress
+
+		root * /var/www/web
+
+		encode zstd br gzip
+
+		@static {
+			file
+			not path *.php
+		}
+		handle @static {
+			file_server
+		}
+
+		@wpPhpExists {
+			path /wp/*
+			file {path}
+			path *.php
+		}
+		handle @wpPhpExists {
+			php
+		}
+
+		@wpDir {
+			path /wp/*
+			file {path}/index.php
+		}
+		handle @wpDir {
+			try_files {path}/index.php
+			php
+		}
+
+		@wpStatic {
+			path /wp/*
+			file
+			not path *.php
+		}
+		handle @wpStatic {
+			file_server
+		}
+
+		handle {
+			rewrite * /index.php?{query}
+			php
+		}
+	}
+
+	respond 404
+}

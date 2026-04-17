@@ -209,6 +209,7 @@ const messages = {
     }
 };
 const i18n = createI18n({
+    legacy: false,
     locale: usePage().props.locale,
     messages
 });

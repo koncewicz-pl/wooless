@@ -1,0 +1,8 @@
+{
+    "mcpServers": {
+        "laravel-boost-app": {
+            "command": "./bin/app",
+            "args": ["php", "artisan", "boost:mcp"]
+        }
+    }
+}

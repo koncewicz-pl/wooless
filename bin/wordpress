@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -e
+
+CONTAINER="wooless-wordpress-app"
+APP_USER="koncewicz"
+
+if [ "$#" -eq 0 ]; then
+  echo "Usage: wordpress <command> [args...]"
+  exit 1
+fi
+
+TTY_FLAG=$([ -t 0 ] && [ -t 1 ] && echo "-it" || echo "-i")
+docker exec $TTY_FLAG -u "$APP_USER" "$CONTAINER" "$@"

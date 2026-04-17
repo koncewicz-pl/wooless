@@ -2,6 +2,8 @@
 
 Mobile-first, self-hosted and simple WooCommerce Headless solution, which adapted for the Polish market.
 
+* WordPress (Bedrock)
+* WooCommerce
 * FrankenPHP
 * Laravel
 * VueJS
@@ -11,4 +13,4 @@ Mobile-first, self-hosted and simple WooCommerce Headless solution, which adapte
 * Furgonetka
 * Przelewy24
 
-[Demo](https://sklep.wooless.pl) • [Installation](docs/README.md)
+[Demo](https://sklep.wooless.pl)

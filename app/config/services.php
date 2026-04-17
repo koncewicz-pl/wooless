@@ -37,6 +37,8 @@ return [
 
     'wordpress' => [
         'container_url' => env('WORDPRESS_CONTAINER_URL'),
+        'wc_key' => env('WORDPRESS_WC_CUSTOMER_KEY'),
+        'wc_secret' => env('WORDPRESS_WC_CUSTOMER_SECRET'),
     ],
 
 ];
