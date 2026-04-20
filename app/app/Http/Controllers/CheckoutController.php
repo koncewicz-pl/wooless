@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use AllowDynamicProperties;
 use App\Services\Auth;
 use App\Services\FrontCart;
 use App\Services\FrontOrder;
 use App\Services\Order;
-use GuzzleHttp\Client;
+use App\Services\WooCommerce\WooCommerceClient;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Promise;
 use Illuminate\Http\RedirectResponse;
@@ -16,10 +15,7 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/**
- * @property Client $client
- */
-#[AllowDynamicProperties] class CheckoutController extends Controller
+class CheckoutController extends Controller
 {
     protected const array paymentMethods = [
         'blik' => '154',
@@ -33,14 +29,10 @@ use Inertia\Response;
         protected FrontCart $frontCart,
         protected FrontOrder $frontOrder,
         protected Auth $auth,
-        protected Order $order
+        protected Order $order,
+        protected WooCommerceClient $client,
     )
-    {
-        $this->client = new Client([
-            'base_uri' => config('services.wordpress.container_url') . '/wordpress/wp-json/',
-            'verify' => false,
-        ]);
-    }
+    {}
 
     /**
      * @throws ValidationException
@@ -56,10 +48,7 @@ use Inertia\Response;
                 uri: 'jwt-auth/v1/token/validate',
                 options: ['headers' => ['Authorization' => 'Bearer ' . $this->auth->token()]]
             ),
-            'cart' => $this->client->getAsync(
-                uri: 'wc/store/v1/cart',
-                options: ['headers' => ['Cart-Token' => $this->frontCart->cartToken()]]
-            )
+            'cart' => $this->client->getAsync('wc/store/v1/cart')
         ];
 
         $responses = Promise\Utils::settle($promises)->wait();
@@ -75,8 +64,6 @@ use Inertia\Response;
                 'exception' => [__('Can not process.')],
             ]);
         }
-
-        $this->frontCart->saveCartToken($responses['cart']['value']);
 
         $cart = $this->frontCart->cartResponse($responses['cart']['value']);
 
@@ -94,9 +81,7 @@ use Inertia\Response;
 
         $password = $this->frontCart->createAccountPassword();
 
-        $checkoutHeaders = [
-            'Cart-Token' => $this->frontCart->cartToken()
-        ];
+        $checkoutHeaders = [];
 
         if ($logged) {
             $password = null;
@@ -167,10 +152,7 @@ use Inertia\Response;
             'settings' => $this->client->getAsync(
                 uri: 'wc/store/v1/settings'
             ),
-            'cart' => $this->client->getAsync(
-                uri: 'wc/store/v1/cart',
-                options: ['headers' => ['Cart-Token' => $this->frontCart->cartToken()]]
-            )
+            'cart' => $this->client->getAsync('wc/store/v1/cart')
         ];
 
         $responses = Promise\Utils::settle($promises)->wait();
@@ -185,7 +167,6 @@ use Inertia\Response;
             abort(503);
         }
 
-        $this->frontCart->saveCartToken($responses['cart']['value']);
         $cart = $this->frontCart->cartResponse($responses['cart']['value']);
 
         if (!$cart['items_count']) {
@@ -207,10 +188,7 @@ use Inertia\Response;
     public function shipping(Request $request): Response|RedirectResponse
     {
         $promises = [
-            'cart' => $this->client->getAsync(
-                uri: 'wc/store/v1/cart',
-                options: ['headers' => ['Cart-Token' => $this->frontCart->cartToken()]]
-            ),
+            'cart' => $this->client->getAsync('wc/store/v1/cart'),
             'settings' => $this->client->getAsync(
                 uri: 'wc/store/v1/settings'
             ),
@@ -221,8 +199,6 @@ use Inertia\Response;
         } catch (\Throwable $e) {
             abort(404);
         }
-
-        $this->frontCart->saveCartToken($responses['cart']);
 
         $cart = $this->frontCart->cartResponse($responses['cart']);
 
@@ -243,10 +219,7 @@ use Inertia\Response;
     public function payment(Request $request): Response|RedirectResponse
     {
         $promises = [
-            'cart' => $this->client->getAsync(
-                uri: 'wc/store/v1/cart',
-                options: ['headers' => ['Cart-Token' => $this->frontCart->cartToken()]]
-            ),
+            'cart' => $this->client->getAsync('wc/store/v1/cart'),
         ];
 
         try {
@@ -254,8 +227,6 @@ use Inertia\Response;
         } catch (\Throwable $e) {
             abort(404);
         }
-
-        $this->frontCart->saveCartToken($responses['cart']);
 
         $cart = $this->frontCart->cartResponse($responses['cart']);
 
@@ -291,10 +262,7 @@ use Inertia\Response;
                 uri: 'wc/store/v1/order/' . $order . '?key=' . $request->key . '&billing_email=' . $request->email,
                 options: ['headers' => ['Authorization' => 'Bearer ' . $this->auth->token()]]
             ),
-            'cart' => $this->client->getAsync(
-                uri: 'wc/store/v1/cart',
-                options: ['headers' => ['Cart-Token' => $this->frontCart->cartToken()]]
-            ),
+            'cart' => $this->client->getAsync('wc/store/v1/cart'),
             'auth' => $this->client->postAsync(
                 uri: 'jwt-auth/v1/token/validate',
                 options: [
@@ -324,8 +292,6 @@ use Inertia\Response;
             $orderRejected = true;
             $orderRejectedCode = $this->orderRejectedCode($responses['order']['reason']);
         }
-
-        $this->frontCart->saveCartToken($responses['cart']['value']);
 
         $orderId = $order;
         $order = [];

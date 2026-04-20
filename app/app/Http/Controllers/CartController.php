@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use AllowDynamicProperties;
 use App\Services\Auth;
 use App\Services\FrontCart;
-use GuzzleHttp\Client;
+use App\Services\WooCommerce\WooCommerceClient;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Promise;
 use Illuminate\Http\RedirectResponse;
@@ -15,29 +14,19 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/**
- * @property Client $client
- */
-#[AllowDynamicProperties] class CartController extends Controller
+class CartController extends Controller
 {
     public function __construct(
         protected FrontCart $frontCart,
         protected Auth $auth,
+        protected WooCommerceClient $client,
     )
-    {
-        $this->client = new Client([
-            'base_uri' => config('services.wordpress.container_url') . '/wordpress/wp-json/',
-            'verify' => false,
-        ]);
-    }
+    {}
 
     public function index(Request $request): Response
     {
         $promises = [
-            'cart' => $this->client->getAsync(
-                uri: 'wc/store/v1/cart',
-                options: ['headers' => ['Cart-Token' => $this->frontCart->cartToken()]]
-            )
+            'cart' => $this->client->getAsync('wc/store/v1/cart')
         ];
 
         $responses = Promise\Utils::settle($promises)->wait();
@@ -50,8 +39,6 @@ use Inertia\Response;
             ]);
         }
 
-        $this->frontCart->saveCartToken($responses['cart']['value']);
-
         return Inertia::render('Cart/Index', [
             'cart' => $this->frontCart->cartResponse($responses['cart']['value'])
         ]);
@@ -60,10 +47,7 @@ use Inertia\Response;
     public function state()
     {
         $promises = [
-            'cart' => $this->client->getAsync(
-                uri: 'wc/store/v1/cart',
-                options: ['headers' => ['Cart-Token' => $this->frontCart->cartToken()]]
-            ),
+            'cart' => $this->client->getAsync('wc/store/v1/cart'),
         ];
 
         $responses = Promise\Utils::settle($promises)->wait();
@@ -74,8 +58,6 @@ use Inertia\Response;
                 'cart' => null
             ]);
         }
-
-        $this->frontCart->saveCartToken($responses['cart']['value']);
 
         return response()->json([
             'cart' => $this->frontCart->cartResponse($responses['cart']['value'])
@@ -102,7 +84,6 @@ use Inertia\Response;
             'cart' => $this->client->postAsync(
                 uri: 'wc/store/v1/cart/select-shipping-rate',
                 options: [
-                    'headers' => ['Cart-Token' => $this->frontCart->cartToken()],
                     'json' => [
                         'package_id' => $request->package_id,
                         'rate_id' => $request->rate_id,
@@ -124,7 +105,6 @@ use Inertia\Response;
                 'extensions' => $this->client->postAsync(
                     uri: 'wc/store/v1/cart/extensions',
                     options: [
-                        'headers' => ['Cart-Token' => $this->frontCart->cartToken()],
                         'json' => [
                             'namespace' => 'furgonetka',
                             'data' => [
@@ -201,7 +181,6 @@ use Inertia\Response;
             'cart' => $this->client->postAsync(
                 uri: 'wc/store/v1/cart/update-customer',
                 options: [
-                    'headers' => ['Cart-Token' => $this->frontCart->cartToken()],
                     'json' => [
                         'billing_address' => [
                             'first_name' => 'Marek',
@@ -317,21 +296,18 @@ use Inertia\Response;
             'cart' => $this->client->postAsync(
                 uri: 'wc/store/v1/cart/add-item',
                 options: [
-                    'headers' => ['Cart-Token' => $this->frontCart->cartToken()],
                     'json' => ['id' => $request->id, 'quantity' => $request->quantity]
                 ]
             ),
         ];
 
         try {
-            $responses = Promise\Utils::unwrap($promises);
+            Promise\Utils::unwrap($promises);
         } catch (\Throwable $e) {
             throw ValidationException::withMessages([
                 'error' => [__('Can not add item to your cart.')],
             ]);
         }
-
-        $this->frontCart->saveCartToken($responses['cart']);
 
         return redirect()->route('cart.index');
     }
@@ -349,21 +325,18 @@ use Inertia\Response;
             'cart' => $this->client->postAsync(
                 uri: 'wc/store/v1/cart/remove-item',
                 options: [
-                    'headers' => ['Cart-Token' => $this->frontCart->cartToken()],
                     'json' => ['key' => $request->key]
                 ]
             ),
         ];
 
         try {
-            $responses = Promise\Utils::unwrap($promises);
+            Promise\Utils::unwrap($promises);
         } catch (\Throwable $e) {
             throw ValidationException::withMessages([
                 'error' => [__('Can not remove item from your cart.')],
             ]);
         }
-
-        $this->frontCart->saveCartToken($responses['cart']);
 
         return redirect()->route('cart.index');
     }
@@ -382,21 +355,18 @@ use Inertia\Response;
             'cart' => $this->client->postAsync(
                 uri: 'wc/store/v1/cart/update-item',
                 options: [
-                    'headers' => ['Cart-Token' => $this->frontCart->cartToken()],
                     'json' => ['key' => $request->key, 'quantity' => $request->quantity]
                 ]
             ),
         ];
 
         try {
-            $responses = Promise\Utils::unwrap($promises);
+            Promise\Utils::unwrap($promises);
         } catch (\Throwable $e) {
             throw ValidationException::withMessages([
                 'error' => [__('Can not update item from your cart.')],
             ]);
         }
-
-        $this->frontCart->saveCartToken($responses['cart']);
 
         return redirect()->route('cart.index');
     }

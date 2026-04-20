@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use AllowDynamicProperties;
 use App\Services\Auth;
 use App\Services\FrontCart;
-use GuzzleHttp\Client;
+use App\Services\WooCommerce\WooCommerceClient;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Promise;
@@ -15,21 +14,14 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/**
- * @property Client $client
- */
-#[AllowDynamicProperties] class RegisterController extends Controller
+class RegisterController extends Controller
 {
     public function __construct(
         protected FrontCart $frontCart,
         protected Auth $auth,
+        protected WooCommerceClient $client,
     )
-    {
-        $this->client = new Client([
-            'base_uri' => config('services.wordpress.container_url') . '/wordpress/wp-json/',
-            'verify' => false,
-        ]);
-    }
+    {}
 
     public function store(Request $request): RedirectResponse
     {
@@ -153,10 +145,7 @@ use Inertia\Response;
                 ]
             ),
 
-            'cart' => $this->client->getAsync(
-                uri: 'wc/store/v1/cart',
-                options: ['headers' => ['Cart-Token' => $this->frontCart->cartToken()]]
-            )
+            'cart' => $this->client->getAsync('wc/store/v1/cart')
         ];
 
         $responses = Promise\Utils::settle($promises)->wait();
@@ -171,8 +160,6 @@ use Inertia\Response;
                 'cart' => []
             ]);
         }
-
-        $this->frontCart->saveCartToken($responses['cart']['value']);
 
         return Inertia::render('Register/Index', [
             'cart' => $this->frontCart->cartResponse($responses['cart']['value'])

@@ -2,33 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use AllowDynamicProperties;
 use App\Services\Auth;
 use App\Services\FrontCart;
 use App\Services\Order;
-use GuzzleHttp\Client;
+use App\Services\WooCommerce\WooCommerceClient;
 use GuzzleHttp\Promise;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/**
- * @property Client $client
- */
-#[AllowDynamicProperties] class OrderController extends Controller
+class OrderController extends Controller
 {
     public function __construct(
         protected FrontCart $frontCart,
         protected Auth $auth,
-        protected Order $order
+        protected Order $order,
+        protected WooCommerceClient $client,
     )
-    {
-        $this->client = new Client([
-            'base_uri' => config('services.wordpress.container_url') . '/wordpress/wp-json/',
-            'verify' => false,
-        ]);
-    }
+    {}
 
     public function index(Request $request): Response|RedirectResponse
     {
@@ -37,10 +29,7 @@ use Inertia\Response;
                 uri: 'jwt-auth/v1/token/validate',
                 options: ['headers' => ['Authorization' => 'Bearer ' . $this->auth->token()]]
             ),
-            'cart' => $this->client->getAsync(
-                uri: 'wc/store/v1/cart',
-                options: ['headers' => ['Cart-Token' => $this->frontCart->cartToken()]]
-            ),
+            'cart' => $this->client->getAsync('wc/store/v1/cart'),
             'orders' => $this->client->getAsync(
                 uri: 'wc/v3/orders',
                 options: [

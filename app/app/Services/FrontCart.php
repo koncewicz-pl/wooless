@@ -31,9 +31,9 @@ class FrontCart
         session(['create_account_password' => null]);
     }
 
-    public function saveCartToken(ResponseInterface $response): void
+    public function saveCartToken(string $token): void
     {
-        session(['cart_token' => $response->getHeader('Cart-Token')[0]]);
+        session(['cart_token' => $token]);
     }
 
     public function cartToken(): string|null
