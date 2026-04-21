@@ -3,9 +3,7 @@
 	order php before file_server
 }
 
-localhost:8201, wooless-wordpress-app:8201 {
-	tls internal
-
+http://wooless-wordpress-app {
 	redir /wordpress/wp/wp-admin /wordpress/wp/wp-admin/ 301
 
 	handle /wordpress/* {
