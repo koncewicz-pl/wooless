@@ -3,7 +3,9 @@
 	order php before file_server
 }
 
-http://wooless-wordpress-app {
+wooless-wordpress-app {
+	tls internal
+
 	redir /wordpress/wp/wp-admin /wordpress/wp/wp-admin/ 301
 
 	handle /wordpress/* {
