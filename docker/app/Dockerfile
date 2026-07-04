@@ -1,7 +1,7 @@
 FROM composer:2 AS composer
-FROM node:25.9.0 AS node
+FROM node:26.4.0 AS node
 
-FROM dunglas/frankenphp:1.9.1-builder-php8.4.14
+FROM dunglas/frankenphp:1.12.4-builder-php8.5.7
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     nano \

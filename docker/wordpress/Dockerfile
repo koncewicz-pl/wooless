@@ -1,6 +1,6 @@
 FROM composer:2 AS composer
 
-FROM dunglas/frankenphp:1.9.1-php8.4.14
+FROM dunglas/frankenphp:1.12.4-php8.5.7
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     nano \
