@@ -20,13 +20,18 @@ class CartController extends Controller
         protected FrontCart $frontCart,
         protected Auth $auth,
         protected WooCommerceClient $client,
-    )
-    {}
+    ) {}
 
     public function index(Request $request): Response
     {
+        if ($request->session()->has('cart')) {
+            return Inertia::render('Cart/Index', [
+                'cart' => $request->session()->get('cart'),
+            ]);
+        }
+
         $promises = [
-            'cart' => $this->client->getAsync('wc/store/v1/cart')
+            'cart' => $this->client->getAsync('wc/store/v1/cart'),
         ];
 
         $responses = Promise\Utils::settle($promises)->wait();
@@ -35,12 +40,12 @@ class CartController extends Controller
 
         if ($rejected) {
             return Inertia::render('Cart/Index', [
-                'cart' => []
+                'cart' => [],
             ]);
         }
 
         return Inertia::render('Cart/Index', [
-            'cart' => $this->frontCart->cartResponse($responses['cart']['value'])
+            'cart' => $this->frontCart->cartResponse($responses['cart']['value']),
         ]);
     }
 
@@ -55,12 +60,12 @@ class CartController extends Controller
         $rejected = $this->rejected($responses, ['cart']);
         if ($rejected) {
             return response()->json([
-                'cart' => null
+                'cart' => null,
             ]);
         }
 
         return response()->json([
-            'cart' => $this->frontCart->cartResponse($responses['cart']['value'])
+            'cart' => $this->frontCart->cartResponse($responses['cart']['value']),
         ]);
     }
 
@@ -68,7 +73,7 @@ class CartController extends Controller
     {
         $rules = [
             'package_id' => 'required',
-            'rate_id' => 'required'
+            'rate_id' => 'required',
         ];
 
         if ($request->furgonetka) {
@@ -87,7 +92,7 @@ class CartController extends Controller
                     'json' => [
                         'package_id' => $request->package_id,
                         'rate_id' => $request->rate_id,
-                    ]
+                    ],
                 ]
             ),
         ];
@@ -109,18 +114,18 @@ class CartController extends Controller
                             'namespace' => 'furgonetka',
                             'data' => [
                                 [
-                                    'action'  => 'set_point',
+                                    'action' => 'set_point',
                                     'payload' => [
-                                        'service'      => $request->furgonetka['selected_point']['service'],
+                                        'service' => $request->furgonetka['selected_point']['service'],
                                         'service_type' => $request->furgonetka['selected_point']['service_type'],
-                                        'code'         => $request->furgonetka['selected_point']['code'],
-                                        'name'         => $request->furgonetka['selected_point']['name'],
+                                        'code' => $request->furgonetka['selected_point']['code'],
+                                        'name' => $request->furgonetka['selected_point']['name'],
                                     ],
                                 ],
                             ],
                         ],
                     ]
-                )
+                ),
             ];
 
             try {
@@ -144,8 +149,8 @@ class CartController extends Controller
         $promises = [
             'auth' => $this->client->postAsync(
                 uri: 'jwt-auth/v1/token/validate',
-                options: ['headers' => ['Authorization' => 'Bearer ' . $this->auth->token()]]
-            )
+                options: ['headers' => ['Authorization' => 'Bearer '.$this->auth->token()]]
+            ),
         ];
 
         $responses = Promise\Utils::settle($promises)->wait();
@@ -159,14 +164,14 @@ class CartController extends Controller
             'billing_address' => 'required|string|max:100',
             'billing_postal_code' => 'required|string|max:10',
             'billing_city' => 'required|string|max:50',
-            'billing_country' => 'required|string|max:2'
+            'billing_country' => 'required|string|max:2',
         ];
 
-        if (!$logged) {
+        if (! $logged) {
             $rules['email'] = 'required|string|lowercase|email|max:100';
         }
 
-        if (!$logged && $request->create_account) {
+        if (! $logged && $request->create_account) {
             $rules['password'] = ['required', Password::min(8)->letters()->numbers()->symbols()];
         }
 
@@ -200,7 +205,7 @@ class CartController extends Controller
                             'city' => $request->billing_city,
                             'country' => $request->billing_country,
                         ],
-                    ]
+                    ],
                 ]
             ),
         ];
@@ -227,7 +232,7 @@ class CartController extends Controller
     {
         $response = json_decode($e->getResponse()->getBody(), true);
 
-        if (!isset($response['code']) || $response['code'] !== 'rest_invalid_param') {
+        if (! isset($response['code']) || $response['code'] !== 'rest_invalid_param') {
             throw ValidationException::withMessages([
                 'exception' => [__('Can not update address.')],
             ]);
@@ -262,23 +267,23 @@ class CartController extends Controller
         ];
 
         foreach ($response['data']['details'] as $field => $details) {
-            if (!isset($fieldMapping[$field])) {
+            if (! isset($fieldMapping[$field])) {
                 continue;
             }
 
-            if (!isset($fieldMapping[$field][$details['code']])) {
+            if (! isset($fieldMapping[$field][$details['code']])) {
                 continue;
             }
 
             $errors[$fieldMapping[$field][$details['code']]] = __('The provided data is not valid.');
         }
 
-        if (!empty($errors)) {
+        if (! empty($errors)) {
             throw ValidationException::withMessages($errors);
         }
 
         throw ValidationException::withMessages([
-            'exception' => [__('Can not update address.')]
+            'exception' => [__('Can not update address.')],
         ]);
     }
 
@@ -296,20 +301,21 @@ class CartController extends Controller
             'cart' => $this->client->postAsync(
                 uri: 'wc/store/v1/cart/add-item',
                 options: [
-                    'json' => ['id' => $request->id, 'quantity' => $request->quantity]
+                    'json' => ['id' => $request->id, 'quantity' => $request->quantity],
                 ]
             ),
         ];
 
         try {
-            Promise\Utils::unwrap($promises);
+            $responses = Promise\Utils::unwrap($promises);
         } catch (\Throwable $e) {
             throw ValidationException::withMessages([
                 'error' => [__('Can not add item to your cart.')],
             ]);
         }
 
-        return redirect()->route('cart.index');
+        return redirect()->route('cart.index')
+            ->with('cart', $this->frontCart->cartResponse($responses['cart']));
     }
 
     /**
@@ -325,20 +331,21 @@ class CartController extends Controller
             'cart' => $this->client->postAsync(
                 uri: 'wc/store/v1/cart/remove-item',
                 options: [
-                    'json' => ['key' => $request->key]
+                    'json' => ['key' => $request->key],
                 ]
             ),
         ];
 
         try {
-            Promise\Utils::unwrap($promises);
+            $responses = Promise\Utils::unwrap($promises);
         } catch (\Throwable $e) {
             throw ValidationException::withMessages([
                 'error' => [__('Can not remove item from your cart.')],
             ]);
         }
 
-        return redirect()->route('cart.index');
+        return redirect()->route('cart.index')
+            ->with('cart', $this->frontCart->cartResponse($responses['cart']));
     }
 
     /**
@@ -355,19 +362,20 @@ class CartController extends Controller
             'cart' => $this->client->postAsync(
                 uri: 'wc/store/v1/cart/update-item',
                 options: [
-                    'json' => ['key' => $request->key, 'quantity' => $request->quantity]
+                    'json' => ['key' => $request->key, 'quantity' => $request->quantity],
                 ]
             ),
         ];
 
         try {
-            Promise\Utils::unwrap($promises);
+            $responses = Promise\Utils::unwrap($promises);
         } catch (\Throwable $e) {
             throw ValidationException::withMessages([
                 'error' => [__('Can not update item from your cart.')],
             ]);
         }
 
-        return redirect()->route('cart.index');
+        return redirect()->route('cart.index')
+            ->with('cart', $this->frontCart->cartResponse($responses['cart']));
     }
 }
