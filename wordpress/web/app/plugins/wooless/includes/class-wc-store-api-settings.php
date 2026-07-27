@@ -23,6 +23,7 @@ class WC_Store_API_Settings {
             'woocommerce_allowed_countries' => get_option('woocommerce_allowed_countries'),
             'woocommerce_specific_allowed_countries' => get_option('woocommerce_specific_allowed_countries'),
             'furgonetka_deliveryToType' => get_option('furgonetka_deliveryToType') ?: [],
+            'furgonetka_test_mode' => (bool) get_option('furgonetka_test_mode'),
         ]);
     }
 }

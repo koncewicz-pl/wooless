@@ -152,6 +152,7 @@
         </div>
 
         <Map
+            :api-host="furgonetkaApiHost"
             :selected-point="selectedPoint"
             :selected-point-index="selectedPointIndex"
             :selected-point-service="selectedPoint?.service"
@@ -212,6 +213,12 @@ const i18n = createI18n({
     legacy: false,
     locale: usePage().props.locale,
     messages
+});
+
+const furgonetkaApiHost = computed(() => {
+    return props.settings.furgonetka_test_mode
+        ? 'https://api.sandbox.furgonetka.pl'
+        : 'https://api.furgonetka.pl';
 });
 
 const furgonetkaDeliveryToType = computed(() => {
@@ -396,7 +403,7 @@ const load = (service) => {
     }
 
     axios.post(
-        'https://api.furgonetka.pl/points/map',
+        furgonetkaApiHost.value + '/points/map',
         {
             location: {
                 // address: address.value,

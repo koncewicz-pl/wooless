@@ -98,6 +98,10 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    apiHost: {
+        type: String,
+        default: 'https://api.furgonetka.pl',
+    },
     selectedPoint: {
         type: Object
     },
@@ -384,7 +388,7 @@ const loadPoints = async (latitude, longitude) => {
     const mapBounds = getMapBounds();
 
     await axios.post(
-        'https://api.furgonetka.pl/points/map',
+        props.apiHost + '/points/map',
         {
             location: {
                 coordinates: {
