@@ -234,7 +234,7 @@ echo "Finalizing WooCommerce..."
 $WP option update woocommerce_coming_soon "no"
 $WP option update woocommerce_store_pages_only "no"
 $WP option update woocommerce_onboarding_profile --format=json '{"completed":true}'
-$WP option update woocommerce_task_list_complete "yes"
+$WP option update woocommerce_task_list_completed_lists --format=json '["setup"]'
 
 echo "WordPress installed successfully!"
 echo "Admin panel: $WORDPRESS_URL/wp/wp-admin/"
