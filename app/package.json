@@ -1,4 +1,5 @@
 {
+    "name": "wooless",
     "private": true,
     "type": "module",
     "scripts": {
