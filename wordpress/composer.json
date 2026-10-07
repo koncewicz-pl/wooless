@@ -32,14 +32,29 @@
         "wp-plugin/*",
         "wp-theme/*"
       ]
+    },
+    {
+      "type": "package",
+      "package": {
+        "name": "przelewy24/woo-przelewy24",
+        "version": "1.2.0",
+        "type": "wordpress-plugin",
+        "dist": {
+          "type": "zip",
+          "url": "https://www.przelewy24.pl/storage/app/media/do-pobrania/gotowe-wtyczki/woocommerce/woocommerce-11-przelewy24-1.2.0.zip",
+          "shasum": "b33d22757666b7de8d9875d7a6ddbd01e2d466ee"
+        },
+        "require": {
+          "composer/installers": "^2.0"
+        }
+      }
     }
   ],
   "require": {
     "php": ">=8.3",
     "composer/installers": "^2.3",
-    "koncewicz-pl/acf-to-rest-api": "3.3.4",
-    "koncewicz-pl/woo-przelewy24": "1.1.0",
     "oscarotero/env": "^2.1",
+    "przelewy24/woo-przelewy24": "1.2.0",
     "roots/bedrock-autoloader": "^1.1",
     "roots/bedrock-disallow-indexing": "^2.1",
     "roots/wordpress": "7.0.2",

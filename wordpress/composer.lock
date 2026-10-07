@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5a8a259828c1a3e3c41c71007e563fcb",
+    "content-hash": "db804753990e431c8b753f2d9d58b9d9",
     "packages": [
         {
             "name": "composer/installers",
@@ -506,91 +506,6 @@
             "time": "2025-12-27T19:43:20+00:00"
         },
         {
-            "name": "koncewicz-pl/acf-to-rest-api",
-            "version": "3.3.4",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/koncewicz-pl/acf-to-rest-api.git",
-                "reference": "93ceeb161ecd17bd5c0cffec84a5849dde626ff9"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/koncewicz-pl/acf-to-rest-api/zipball/93ceeb161ecd17bd5c0cffec84a5849dde626ff9",
-                "reference": "93ceeb161ecd17bd5c0cffec84a5849dde626ff9",
-                "shasum": ""
-            },
-            "require": {
-                "composer/installers": "^1.0 || ^2.0",
-                "php": ">=5.3.2"
-            },
-            "type": "wordpress-plugin",
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "GPL-2.0-only"
-            ],
-            "authors": [
-                {
-                    "name": "Aires Gonçalves",
-                    "email": "airesvsg@gmail.com",
-                    "homepage": "http://airesgoncalves.com",
-                    "role": "Developer"
-                }
-            ],
-            "description": "Exposes Advanced Custom Fields Endpoints in the WordPress REST API",
-            "homepage": "https://github.com/airesvsg/acf-to-rest-api",
-            "keywords": [
-                "acf",
-                "fields",
-                "json",
-                "rest-api",
-                "wordpres-plugin",
-                "wordpress",
-                "wp",
-                "wp-api"
-            ],
-            "support": {
-                "email": "airesvsg@gmail.com",
-                "issues": "https://github.com/airesvsg/acf-to-rest-api/issues",
-                "source": "https://github.com/koncewicz-pl/acf-to-rest-api/tree/3.3.4"
-            },
-            "funding": [
-                {
-                    "url": "https://www.paypal.com/donate?hosted_button_id=P4DVDKW4ZV7GE",
-                    "type": "custom"
-                }
-            ],
-            "time": "2026-04-11T10:43:31+00:00"
-        },
-        {
-            "name": "koncewicz-pl/woo-przelewy24",
-            "version": "1.1.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/koncewicz-pl/woo-przelewy24.git",
-                "reference": "c00289071ff5e6726576f47518eedaa768b8bf18"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/koncewicz-pl/woo-przelewy24/zipball/c00289071ff5e6726576f47518eedaa768b8bf18",
-                "reference": "c00289071ff5e6726576f47518eedaa768b8bf18",
-                "shasum": ""
-            },
-            "require": {
-                "composer/installers": "^2.0"
-            },
-            "type": "wordpress-plugin",
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "GPL-3.0-or-later"
-            ],
-            "description": "Przelewy24 payment gateway for WooCommerce",
-            "support": {
-                "issues": "https://github.com/koncewicz-pl/woo-przelewy24/issues",
-                "source": "https://github.com/koncewicz-pl/woo-przelewy24/tree/1.1.0"
-            },
-            "time": "2026-07-04T15:57:41+00:00"
-        },
-        {
             "name": "mck89/peast",
             "version": "v1.17.6",
             "source": {
@@ -866,6 +781,19 @@
                 }
             ],
             "time": "2025-12-27T19:41:33+00:00"
+        },
+        {
+            "name": "przelewy24/woo-przelewy24",
+            "version": "1.2.0",
+            "dist": {
+                "type": "zip",
+                "url": "https://www.przelewy24.pl/storage/app/media/do-pobrania/gotowe-wtyczki/woocommerce/woocommerce-11-przelewy24-1.2.0.zip",
+                "shasum": "b33d22757666b7de8d9875d7a6ddbd01e2d466ee"
+            },
+            "require": {
+                "composer/installers": "^2.0"
+            },
+            "type": "wordpress-plugin"
         },
         {
             "name": "roots/bedrock-autoloader",

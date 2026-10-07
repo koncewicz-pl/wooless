@@ -34,9 +34,6 @@ $WP option update permalink_structure '/%postname%/'
 echo "Activating ACF plugin..."
 $WP plugin activate advanced-custom-fields
 
-echo "Activating ACF to REST API plugin..."
-$WP plugin activate acf-to-rest-api
-
 echo "Activating WooCommerce plugin..."
 $WP plugin activate woocommerce
 #$WP wc update
