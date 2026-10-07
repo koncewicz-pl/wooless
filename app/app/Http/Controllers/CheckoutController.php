@@ -7,7 +7,7 @@ use App\Services\FrontCart;
 use App\Services\FrontOrder;
 use App\Services\Order;
 use App\Services\WooCommerce\WooCommerceClient;
-use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\ResponseException;
 use GuzzleHttp\Promise;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -31,8 +31,7 @@ class CheckoutController extends Controller
         protected Auth $auth,
         protected Order $order,
         protected WooCommerceClient $client,
-    )
-    {}
+    ) {}
 
     /**
      * @throws ValidationException
@@ -40,15 +39,15 @@ class CheckoutController extends Controller
     public function process(Request $request)
     {
         $request->validate([
-            'payment_method' => 'required|in:blik,ing,mbank,pko,santander'
+            'payment_method' => 'required|in:blik,ing,mbank,pko,santander',
         ]);
 
         $promises = [
             'auth' => $this->client->postAsync(
                 uri: 'jwt-auth/v1/token/validate',
-                options: ['headers' => ['Authorization' => 'Bearer ' . $this->auth->token()]]
+                options: ['headers' => ['Authorization' => 'Bearer '.$this->auth->token()]]
             ),
-            'cart' => $this->client->getAsync('wc/store/v1/cart')
+            'cart' => $this->client->getAsync('wc/store/v1/cart'),
         ];
 
         $responses = Promise\Utils::settle($promises)->wait();
@@ -67,13 +66,13 @@ class CheckoutController extends Controller
 
         $cart = $this->frontCart->cartResponse($responses['cart']['value']);
 
-        if (!$cart['items_count']) {
+        if (! $cart['items_count']) {
             throw ValidationException::withMessages([
                 'exception' => [__('Can not process.')],
             ]);
         }
 
-        if (!$cart['billing_address']['email']) {
+        if (! $cart['billing_address']['email']) {
             throw ValidationException::withMessages([
                 'exception' => [__('Can not process.')],
             ]);
@@ -86,7 +85,7 @@ class CheckoutController extends Controller
         if ($logged) {
             $password = null;
             $cart['billing_address']['email'] = $this->auth->customerEmail();
-            $checkoutHeaders['Authorization'] = 'Bearer ' . $this->auth->token();
+            $checkoutHeaders['Authorization'] = 'Bearer '.$this->auth->token();
         }
 
         $promises = [
@@ -95,23 +94,23 @@ class CheckoutController extends Controller
                 options: [
                     'headers' => $checkoutHeaders,
                     'json' => [
-                        'create_account' => (bool)$password,
+                        'create_account' => (bool) $password,
                         'customer_password' => $password ?? '',
                         'billing_address' => $cart['billing_address'],
                         'shipping_address' => $cart['shipping_address'],
-                        'payment_method' => 'p24-online-payments-' . self::paymentMethods[$request->payment_method],
+                        'payment_method' => 'p24-online-payments-'.self::paymentMethods[$request->payment_method],
                         'payment_data' => [
                             ['key' => 'regulation', 'value' => true],
-                            ['key' => 'wc-p24-online-payments-' . self::paymentMethods[$request->payment_method] . '-new-payment-method', 'value' => false]
-                        ]
-                    ]
+                            ['key' => 'wc-p24-online-payments-'.self::paymentMethods[$request->payment_method].'-new-payment-method', 'value' => false],
+                        ],
+                    ],
                 ]
             ),
         ];
 
         try {
             $responses = Promise\Utils::unwrap($promises);
-        } catch (RequestException $e) {
+        } catch (ResponseException $e) {
             $this->processExceptionMessage($e);
         } catch (\Throwable $e) {
             throw ValidationException::withMessages([
@@ -127,11 +126,11 @@ class CheckoutController extends Controller
     /**
      * @throws ValidationException
      */
-    protected function processExceptionMessage(RequestException $e)
+    protected function processExceptionMessage(ResponseException $e): void
     {
         $response = json_decode($e->getResponse()->getBody(), true);
 
-        if (!isset($response['code'])) {
+        if (! isset($response['code'])) {
             throw ValidationException::withMessages([
                 'exception' => [__('Can not process.')],
             ]);
@@ -147,12 +146,12 @@ class CheckoutController extends Controller
         $promises = [
             'auth' => $this->client->postAsync(
                 uri: 'jwt-auth/v1/token/validate',
-                options: ['headers' => ['Authorization' => 'Bearer ' . $this->auth->token()]]
+                options: ['headers' => ['Authorization' => 'Bearer '.$this->auth->token()]]
             ),
             'settings' => $this->client->getAsync(
                 uri: 'wc/store/v1/settings'
             ),
-            'cart' => $this->client->getAsync('wc/store/v1/cart')
+            'cart' => $this->client->getAsync('wc/store/v1/cart'),
         ];
 
         $responses = Promise\Utils::settle($promises)->wait();
@@ -169,7 +168,7 @@ class CheckoutController extends Controller
 
         $cart = $this->frontCart->cartResponse($responses['cart']['value']);
 
-        if (!$cart['items_count']) {
+        if (! $cart['items_count']) {
             return redirect()->route('cart.index');
         }
 
@@ -178,7 +177,7 @@ class CheckoutController extends Controller
         return Inertia::render('Checkout/Index', [
             'settings' => json_decode($responses['settings']['value']->getBody()->getContents(), true),
             'cart' => $cart,
-            'create_account' => (bool)$password,
+            'create_account' => (bool) $password,
             'password' => $password,
             'logged' => $logged,
             'customer_email' => $logged ? $this->auth->customerEmail() : '',
@@ -202,11 +201,11 @@ class CheckoutController extends Controller
 
         $cart = $this->frontCart->cartResponse($responses['cart']);
 
-        if (!$cart['items_count']) {
+        if (! $cart['items_count']) {
             return redirect()->route('cart.index');
         }
 
-        if (!$cart['billing_address']['email']) {
+        if (! $cart['billing_address']['email']) {
             return redirect()->route('checkout.index');
         }
 
@@ -230,11 +229,11 @@ class CheckoutController extends Controller
 
         $cart = $this->frontCart->cartResponse($responses['cart']);
 
-        if (!$cart['items_count']) {
+        if (! $cart['items_count']) {
             return redirect()->route('cart.index');
         }
 
-        if (!$cart['billing_address']['email']) {
+        if (! $cart['billing_address']['email']) {
             return redirect()->route('checkout.index');
         }
 
@@ -247,7 +246,7 @@ class CheckoutController extends Controller
     {
         if (in_array(request()->header('Referer'), [
             'https://sandbox-go.przelewy24.pl/',
-            'https://go.przelewy24.pl/'
+            'https://go.przelewy24.pl/',
         ])) {
             $this->frontCart->clearCartToken();
             $this->frontCart->clearCreateAccountPassword();
@@ -259,16 +258,16 @@ class CheckoutController extends Controller
 
         $promises = [
             'order' => $this->client->getAsync(
-                uri: 'wc/store/v1/order/' . $order . '?key=' . $request->key . '&billing_email=' . $request->email,
-                options: ['headers' => ['Authorization' => 'Bearer ' . $this->auth->token()]]
+                uri: 'wc/store/v1/order/'.$order.'?key='.$request->key.'&billing_email='.$request->email,
+                options: ['headers' => ['Authorization' => 'Bearer '.$this->auth->token()]]
             ),
             'cart' => $this->client->getAsync('wc/store/v1/cart'),
             'auth' => $this->client->postAsync(
                 uri: 'jwt-auth/v1/token/validate',
                 options: [
                     'headers' => [
-                        'Authorization' => 'Bearer ' . $this->auth->token()
-                    ]
+                        'Authorization' => 'Bearer '.$this->auth->token(),
+                    ],
                 ]
             ),
         ];
@@ -295,27 +294,32 @@ class CheckoutController extends Controller
 
         $orderId = $order;
         $order = [];
-        if (!$orderRejected) {
+        if (! $orderRejected) {
             $order = $this->frontOrder->orderResponse($responses['order']['value']);
         }
 
         return Inertia::render('Checkout/Order', [
             'order' => $order,
             'cart' => $this->frontCart->cartResponse($responses['cart']['value']),
-            'orderId' => (int)$orderId,
+            'orderId' => (int) $orderId,
             'logged' => $logged,
             'orderRejected' => $orderRejected,
             'orderRejectedCode' => $orderRejectedCode,
         ]);
     }
 
-    protected function orderRejectedCode($reason)
+    /**
+     * Guzzle 8 exposes the response only on ResponseException (ClientException, ServerException);
+     * other rejection reasons carry none.
+     */
+    protected function orderRejectedCode(mixed $reason): ?string
     {
-        $data = [];
-        if ($reason instanceof RequestException && $reason->hasResponse()) {
-            $data = json_decode($reason->getResponse()->getBody(), true);
+        if (! $reason instanceof ResponseException) {
+            return null;
         }
 
-        return $data['code'] ?? null;
+        $data = json_decode((string) $reason->getResponse()->getBody(), true);
+
+        return is_array($data) ? ($data['code'] ?? null) : null;
     }
 }

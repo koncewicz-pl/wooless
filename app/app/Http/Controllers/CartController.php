@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\Auth;
 use App\Services\FrontCart;
 use App\Services\WooCommerce\WooCommerceClient;
-use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\ResponseException;
 use GuzzleHttp\Promise;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -212,7 +212,7 @@ class CartController extends Controller
 
         try {
             Promise\Utils::unwrap($promises);
-        } catch (RequestException $e) {
+        } catch (ResponseException $e) {
             $this->exceptionMessage($e);
         } catch (\Throwable $e) {
             throw ValidationException::withMessages([
@@ -228,7 +228,7 @@ class CartController extends Controller
         return redirect()->route('checkout.shipping');
     }
 
-    protected function exceptionMessage(RequestException $e)
+    protected function exceptionMessage(ResponseException $e): void
     {
         $response = json_decode($e->getResponse()->getBody(), true);
 

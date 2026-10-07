@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Services\Auth;
 use App\Services\FrontCart;
 use App\Services\WooCommerce\WooCommerceClient;
-use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\ResponseException;
 use GuzzleHttp\Promise;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,14 +20,13 @@ class RegisterController extends Controller
         protected FrontCart $frontCart,
         protected Auth $auth,
         protected WooCommerceClient $client,
-    )
-    {}
+    ) {}
 
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
             'email' => ['required', 'email'],
-            'password' => ['required','min:8'],
+            'password' => ['required', 'min:8'],
         ]);
 
         $promises = [
@@ -35,8 +34,8 @@ class RegisterController extends Controller
                 uri: 'wc/v3/customers',
                 options: [
                     'headers' => [
-                        'Authorization' => 'Basic ' . base64_encode(
-                            string: config('services.wordpress.wc_key') . ':' . config('services.wordpress.wc_secret')
+                        'Authorization' => 'Basic '.base64_encode(
+                            string: config('services.wordpress.wc_key').':'.config('services.wordpress.wc_secret')
                         ),
                     ],
                     'json' => [
@@ -50,7 +49,7 @@ class RegisterController extends Controller
 
         try {
             Promise\Utils::unwrap($promises);
-        } catch (ClientException|RequestException $e) {
+        } catch (RequestException $e) {
             $this->handleRegisterException($e);
         } catch (\Throwable $e) {
             throw ValidationException::withMessages([
@@ -64,10 +63,10 @@ class RegisterController extends Controller
                 options: [
                     'json' => [
                         'username' => $request->email,
-                        'password' => $request->password
-                    ]
+                        'password' => $request->password,
+                    ],
                 ]
-            )
+            ),
         ];
 
         try {
@@ -85,7 +84,7 @@ class RegisterController extends Controller
 
     protected function handleRegisterException(RequestException $e): void
     {
-        if (!$e->hasResponse()) {
+        if (! $e instanceof ResponseException) {
             throw ValidationException::withMessages([
                 'exception' => [__('Can not create account.')],
             ]);
@@ -94,7 +93,7 @@ class RegisterController extends Controller
         $resp = (string) $e->getResponse()->getBody();
         $json = json_decode($resp, true);
 
-        if (!is_array($json)) {
+        if (! is_array($json)) {
             throw ValidationException::withMessages([
                 'exception' => [__('Can not create account.')],
             ]);
@@ -140,12 +139,12 @@ class RegisterController extends Controller
                 uri: 'jwt-auth/v1/token/validate',
                 options: [
                     'headers' => [
-                        'Authorization' => 'Bearer ' . $this->auth->token()
-                    ]
+                        'Authorization' => 'Bearer '.$this->auth->token(),
+                    ],
                 ]
             ),
 
-            'cart' => $this->client->getAsync('wc/store/v1/cart')
+            'cart' => $this->client->getAsync('wc/store/v1/cart'),
         ];
 
         $responses = Promise\Utils::settle($promises)->wait();
@@ -157,12 +156,12 @@ class RegisterController extends Controller
         $rejected = $this->rejected($responses, ['cart']);
         if ($rejected) {
             return Inertia::render('Register/Index', [
-                'cart' => []
+                'cart' => [],
             ]);
         }
 
         return Inertia::render('Register/Index', [
-            'cart' => $this->frontCart->cartResponse($responses['cart']['value'])
+            'cart' => $this->frontCart->cartResponse($responses['cart']['value']),
         ]);
     }
 }
