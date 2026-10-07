@@ -203,7 +203,7 @@ upgrade. `php artisan boost:update` exists but refuses to run until `boost:insta
 in this checkout (as of October 2026 it has not); `boost:install` is interactive and rewrites the
 guidelines wholesale, so leave it to the user and mention the stale header in the summary.
 
-### 6. Summarise and commit
+### 6. Summarise, commit, and release
 
 Present a short summary: the three image versions, counts of bumped packages per manifest, the
 majors that were crossed, anything held or abandoned, and the code fixes made. Then commit (unless
@@ -216,6 +216,26 @@ Upgrade dependencies.
 If the only change is a single security bump, name it instead, like the existing
 `Update WordPress core to 7.0.2 to patch security vulnerability.` A lone Przelewy24 bump reads
 `Update Przelewy24 plugin to 1.2.0.`
+
+**Release.** The project uses semantic versioning with annotated git tags; production deploys a tag
+(see the `deploy` skill). A dependency sweep is a MINOR release, a fix or security bump between sweeps
+is a PATCH, an architecture change is a MAJOR. After the upgrade commit:
+
+1. Generate the dependency table and add a `## [X.Y.0] - YYYY-MM-DD` section to `CHANGELOG.md`
+   (Keep a Changelog format; move anything from `[Unreleased]` into it, add the compare link at the bottom):
+   ```bash
+   python3 .claude/skills/upgrade-dependencies/scripts/changelog_deps.py <previous tag> HEAD
+   ```
+   Put the table under `### Dependencies`; code fixes made during the upgrade go under `### Fixed`.
+2. Commit the changelog (`Release X.Y.0.`), then tag and push:
+   ```bash
+   git tag -a vX.Y.0 -m "Wooless X.Y.0 — <one line: runtime + headline packages>"
+   git push && git push --tags
+   ```
+3. A fix discovered after the release (like the Guzzle 8 order-page 500) gets its own commit, a
+   `## [X.Y.1]` changelog section and tag `vX.Y.1`; do not amend a tag that has been pushed.
+
+Then offer to deploy the tag with the `deploy` skill.
 
 ## When the script cannot help
 
