@@ -8,8 +8,49 @@ Releases are git tags (`vX.Y.Z`); production runs a tag, never a bare branch.
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-10-21
+
 ### Changed
 - Renamed the `upgrade-dependencies` Claude Code skill to `upgrade-deps`.
+
+### Dependencies
+
+#### Runtime
+
+| Package | From | To |
+|---|---|---|
+| FrankenPHP | 1.13.0 | 1.13.2 |
+| Node | 26.10.0 | 26.12.1 |
+| PHP | 8.5.11 | 8.5.12 |
+
+#### WordPress (Composer)
+
+| Package | From | To |
+|---|---|---|
+| wp-plugin/woocommerce | 11.1.2 | 11.2.1 |
+
+#### Laravel (Composer)
+
+| Package | From | To |
+|---|---|---|
+| guzzlehttp/promises | ^3.0 | ^3.1 |
+| laravel/framework | ^13.35 | ^13.38 |
+| laravel/octane | ^2.21 | ^2.22 |
+| laravel/sail | ^1.68 | ^1.69 |
+
+#### Frontend (npm)
+
+| Package | From | To |
+|---|---|---|
+| @inertiajs/vue3 | ^3.8.0 | ^3.9.1 |
+| @vitejs/plugin-vue | ^6.0.9 | ^6.0.10 |
+| @vue/server-renderer | ^3.5.43 | ^3.5.44 |
+| chokidar | ^5.0.0 | ^6.0.0 |
+| concurrently | ^10.0.5 | ^10.0.6 |
+| postcss | ^8.5.29 | ^8.5.31 |
+| vite | ^8.3.3 | ^8.3.5 |
+| vue | ^3.5.43 | ^3.5.44 |
+| vue-i18n | ^11.4.13 | ^11.4.16 |
 
 ## [2.2.0] - 2026-10-07
 
@@ -186,7 +227,8 @@ Releases are git tags (`vX.Y.Z`); production runs a tag, never a bare branch.
 
 - Initial release.
 
-[Unreleased]: https://github.com/koncewicz-pl/wooless/compare/v2.2.0...HEAD
+[Unreleased]: https://github.com/koncewicz-pl/wooless/compare/v2.3.0...HEAD
+[2.3.0]: https://github.com/koncewicz-pl/wooless/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/koncewicz-pl/wooless/compare/v2.1.2...v2.2.0
 [2.1.2]: https://github.com/koncewicz-pl/wooless/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/koncewicz-pl/wooless/compare/v2.1.0...v2.1.1
