@@ -17,7 +17,7 @@ that exists on `origin`. `--rollback` means the tag before the one currently dep
 ## Before deploying
 
 1. The tag must exist on `origin` (`git ls-remote --tags origin`). If the user asks to deploy work
-   that is not tagged yet, tag it first — see the release step of the `upgrade-dependencies` skill
+   that is not tagged yet, tag it first — see the release step of the `upgrade-deps` skill
    (CHANGELOG entry, annotated tag, push with `--tags`).
 2. Read the CHANGELOG section for that tag. Anything under *Removed* that is a WordPress plugin must
    be deactivated on the server before `composer install` deletes its files; the script does this

@@ -8,6 +8,9 @@ Releases are git tags (`vX.Y.Z`); production runs a tag, never a bare branch.
 
 ## [Unreleased]
 
+### Changed
+- Renamed the `upgrade-dependencies` Claude Code skill to `upgrade-deps`.
+
 ## [2.2.0] - 2026-10-07
 
 ### Added

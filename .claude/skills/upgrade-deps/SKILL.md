@@ -1,5 +1,5 @@
 ---
-name: upgrade-dependencies
+name: upgrade-deps
 description: Upgrade every dependency of the Wooless stack in one go — Docker base images (FrankenPHP/PHP, Node), Composer packages in app/ (Laravel) and wordpress/ (Bedrock, WordPress core, WooCommerce and other plugins), and npm packages in app/ — then rebuild, retest, fix deprecations and commit. Use this whenever the user wants to update, upgrade, bump or refresh dependencies, packages, PHP, Node, Laravel, WordPress, WooCommerce or plugins, asks "what's outdated", or mentions a security release of WordPress/WooCommerce/Laravel, even if they name only one package — the full sweep is the default here. Also use it for a report-only check of what is outdated.
 ---
 
@@ -42,7 +42,7 @@ PHP runtime story and drifting them apart has no upside.
 ### 1. Collect what is outdated
 
 ```bash
-python3 .claude/skills/upgrade-dependencies/scripts/check_outdated.py
+python3 .claude/skills/upgrade-deps/scripts/check_outdated.py
 ```
 
 The report has five sections: Docker images, Composer (app), Composer (wordpress), npm, and the
@@ -108,7 +108,7 @@ check that `./up.sh` printed `frankenphp: started`, `cron: started`, `ssr: start
 ### 4. Bump the package manifests and update lock files
 
 ```bash
-python3 .claude/skills/upgrade-dependencies/scripts/check_outdated.py --apply
+python3 .claude/skills/upgrade-deps/scripts/check_outdated.py --apply
 ./bin/wordpress composer update
 ./bin/app composer update
 ./bin/app npm install
@@ -224,7 +224,7 @@ is a PATCH, an architecture change is a MAJOR. After the upgrade commit:
 1. Generate the dependency table and add a `## [X.Y.0] - YYYY-MM-DD` section to `CHANGELOG.md`
    (Keep a Changelog format; move anything from `[Unreleased]` into it, add the compare link at the bottom):
    ```bash
-   python3 .claude/skills/upgrade-dependencies/scripts/changelog_deps.py <previous tag> HEAD
+   python3 .claude/skills/upgrade-deps/scripts/changelog_deps.py <previous tag> HEAD
    ```
    Put the table under `### Dependencies`; code fixes made during the upgrade go under `### Fixed`.
 2. Commit the changelog (`Release X.Y.0.`), then tag and push:
