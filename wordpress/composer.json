@@ -64,7 +64,7 @@
     "wp-plugin/advanced-custom-fields": "6.8.10",
     "wp-plugin/furgonetka": "1.9.9",
     "wp-plugin/jwt-auth": "3.0.2",
-    "wp-plugin/woocommerce": "11.1.2",
+    "wp-plugin/woocommerce": "11.2.1",
     "wp-theme/twentytwentyfive": "^1.5"
   },
   "require-dev": {
