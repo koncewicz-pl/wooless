@@ -8,6 +8,11 @@ Releases are git tags (`vX.Y.Z`); production runs a tag, never a bare branch.
 
 ## [Unreleased]
 
+### Changed
+- `OCTANE_HOST` holds exactly one main domain. Aliases go into the new `OCTANE_REDIRECT_HOSTS`
+  (comma-separated, empty = `www.<OCTANE_HOST>`) and a second site block in `app/Caddyfile`
+  redirects them permanently to the main domain, as in the other projects.
+
 ## [2.4.0] - 2026-10-22
 
 ### Changed

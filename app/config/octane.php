@@ -48,8 +48,10 @@ return [
     | The port the server listens on (Octane reads it when no --port option
     | is given) and the variables passed to the FrankenPHP / Caddy process on
     | top of the ones computed by Octane. The site address is built from
-    | OCTANE_HOST (one domain or a comma-separated list), so the production
-    | domains live in .env and Caddy obtains their certificates on its own.
+    | OCTANE_HOST, so the production domain lives in .env and Caddy obtains
+    | the certificate for it on its own. OCTANE_REDIRECT_HOSTS (a comma
+    | separated list, "www.<OCTANE_HOST>" by default) names the extra domains
+    | the Caddyfile redirects to the main one.
     | Empty global options keep Caddy's default automatic HTTPS, i.e. HTTP on
     | port 80 is redirected to HTTPS (the equivalent of --https --http-redirect).
     | Keep both ports in sync with the mappings in docker-compose.yml.
@@ -64,13 +66,15 @@ return [
 
     'caddy' => [
         'env' => [
-            'CADDY_SERVER_SERVER_NAME' => implode(', ', array_map(
-                fn (string $host): string => 'https://'.trim($host).':443',
-                explode(',', env('OCTANE_HOST', 'localhost')),
+            'CADDY_SERVER_SERVER_NAME' => 'https://'.env('OCTANE_HOST', 'localhost').':443',
+            'CADDY_APP_HOST' => env('OCTANE_HOST', 'localhost'),
+            'CADDY_REDIRECT_HOSTS' => implode(', ', array_map(
+                fn (string $host): string => trim($host),
+                explode(',', env('OCTANE_REDIRECT_HOSTS') ?: 'www.'.env('OCTANE_HOST', 'localhost')),
             )),
             'CADDY_GLOBAL_OPTIONS' => '',
             'WORDPRESS_CONTAINER_URL' => env('WORDPRESS_CONTAINER_URL'),
-            'WORDPRESS_HOST' => trim(explode(',', env('OCTANE_HOST', 'localhost'))[0]),
+            'WORDPRESS_HOST' => env('OCTANE_HOST', 'localhost'),
         ],
     ],
 

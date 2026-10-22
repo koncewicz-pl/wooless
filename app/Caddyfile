@@ -16,6 +16,15 @@
 
 {$CADDY_EXTRA_CONFIG}
 
+# Extra domains (www and any other alias) redirect to the main one. Both variables
+# come from config/octane.php (caddy.env), built from OCTANE_HOST and
+# OCTANE_REDIRECT_HOSTS in .env; by default only www.<domain> is redirected.
+# Caddy obtains the certificates itself: Let's Encrypt in production, the
+# internal CA for *.localhost (no ACME attempts locally).
+{$CADDY_REDIRECT_HOSTS} {
+	redir https://{$CADDY_APP_HOST}{uri} permanent
+}
+
 {$CADDY_SERVER_SERVER_NAME} {
 	log {
 		level {$CADDY_SERVER_LOG_LEVEL}
