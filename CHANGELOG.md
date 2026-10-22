@@ -8,6 +8,8 @@ Releases are git tags (`vX.Y.Z`); production runs a tag, never a bare branch.
 
 ## [Unreleased]
 
+## [2.4.0] - 2026-10-22
+
 ### Changed
 - The public domain is configured only in `.env`: `OCTANE_HOST` in `app/.env` (one domain or a
   comma-separated list) feeds the Caddy site address through `config/octane.php`, and the supervisor
@@ -246,7 +248,8 @@ Releases are git tags (`vX.Y.Z`); production runs a tag, never a bare branch.
 
 - Initial release.
 
-[Unreleased]: https://github.com/koncewicz-pl/wooless/compare/v2.3.0...HEAD
+[Unreleased]: https://github.com/koncewicz-pl/wooless/compare/v2.4.0...HEAD
+[2.4.0]: https://github.com/koncewicz-pl/wooless/compare/v2.3.0...v2.4.0
 [2.3.0]: https://github.com/koncewicz-pl/wooless/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/koncewicz-pl/wooless/compare/v2.1.2...v2.2.0
 [2.1.2]: https://github.com/koncewicz-pl/wooless/compare/v2.1.1...v2.1.2
