@@ -8,6 +8,8 @@ Releases are git tags (`vX.Y.Z`); production runs a tag, never a bare branch.
 
 ## [Unreleased]
 
+## [2.5.0] - 2026-10-22
+
 ### Changed
 - `OCTANE_HOST` holds exactly one main domain. Aliases go into the new `OCTANE_REDIRECT_HOSTS`
   (comma-separated, empty = `www.<OCTANE_HOST>`) and a second site block in `app/Caddyfile`
@@ -253,7 +255,8 @@ Releases are git tags (`vX.Y.Z`); production runs a tag, never a bare branch.
 
 - Initial release.
 
-[Unreleased]: https://github.com/koncewicz-pl/wooless/compare/v2.4.0...HEAD
+[Unreleased]: https://github.com/koncewicz-pl/wooless/compare/v2.5.0...HEAD
+[2.5.0]: https://github.com/koncewicz-pl/wooless/compare/v2.4.0...v2.5.0
 [2.4.0]: https://github.com/koncewicz-pl/wooless/compare/v2.3.0...v2.4.0
 [2.3.0]: https://github.com/koncewicz-pl/wooless/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/koncewicz-pl/wooless/compare/v2.1.2...v2.2.0
