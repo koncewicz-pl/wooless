@@ -1,6 +1,5 @@
 <?php
 
-use App\Services\OctaneHosts;
 use Laravel\Octane\Contracts\OperationTerminated;
 use Laravel\Octane\Events\RequestHandled;
 use Laravel\Octane\Events\RequestReceived;
@@ -65,10 +64,13 @@ return [
 
     'caddy' => [
         'env' => [
-            'CADDY_SERVER_SERVER_NAME' => OctaneHosts::caddySiteAddress(env('OCTANE_HOST'), 443),
+            'CADDY_SERVER_SERVER_NAME' => implode(', ', array_map(
+                fn (string $host): string => 'https://'.trim($host).':443',
+                explode(',', env('OCTANE_HOST', 'localhost')),
+            )),
             'CADDY_GLOBAL_OPTIONS' => '',
             'WORDPRESS_CONTAINER_URL' => env('WORDPRESS_CONTAINER_URL'),
-            'WORDPRESS_HOST' => OctaneHosts::primary(env('OCTANE_HOST')),
+            'WORDPRESS_HOST' => trim(explode(',', env('OCTANE_HOST', 'localhost'))[0]),
         ],
     ],
 

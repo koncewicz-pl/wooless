@@ -8,6 +8,10 @@ Releases are git tags (`vX.Y.Z`); production runs a tag, never a bare branch.
 
 ## [Unreleased]
 
+### Changed
+- The `OCTANE_HOST` parsing lives inline in `config/octane.php`, as in the other projects; the
+  `App\Services\OctaneHosts` helper introduced in 2.4.0 is removed.
+
 ## [2.4.0] - 2026-10-22
 
 ### Changed
