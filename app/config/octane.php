@@ -1,5 +1,6 @@
 <?php
 
+use App\Services\OctaneHosts;
 use Laravel\Octane\Contracts\OperationTerminated;
 use Laravel\Octane\Events\RequestHandled;
 use Laravel\Octane\Events\RequestReceived;
@@ -39,6 +40,37 @@ return [
     */
 
     'server' => env('OCTANE_SERVER', 'frankenphp'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | FrankenPHP Server Port & Caddy Environment
+    |--------------------------------------------------------------------------
+    |
+    | The port the server listens on (Octane reads it when no --port option
+    | is given) and the variables passed to the FrankenPHP / Caddy process on
+    | top of the ones computed by Octane. The site address is built from
+    | OCTANE_HOST (one domain or a comma-separated list), so the production
+    | domains live in .env and Caddy obtains their certificates on its own.
+    | Empty global options keep Caddy's default automatic HTTPS, i.e. HTTP on
+    | port 80 is redirected to HTTPS (the equivalent of --https --http-redirect).
+    | Keep both ports in sync with the mappings in docker-compose.yml.
+    |
+    | WORDPRESS_CONTAINER_URL and WORDPRESS_HOST feed the WordPress reverse
+    | proxy block of the Caddyfile: the upstream on the Docker network and the
+    | public host forwarded to WordPress as X-Forwarded-Host.
+    |
+    */
+
+    'port' => 443,
+
+    'caddy' => [
+        'env' => [
+            'CADDY_SERVER_SERVER_NAME' => OctaneHosts::caddySiteAddress(env('OCTANE_HOST'), 443),
+            'CADDY_GLOBAL_OPTIONS' => '',
+            'WORDPRESS_CONTAINER_URL' => env('WORDPRESS_CONTAINER_URL'),
+            'WORDPRESS_HOST' => OctaneHosts::primary(env('OCTANE_HOST')),
+        ],
+    ],
 
     /*
     |--------------------------------------------------------------------------

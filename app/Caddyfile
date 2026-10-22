@@ -6,9 +6,15 @@
 	admin {$CADDY_SERVER_ADMIN_HOST}:{$CADDY_SERVER_ADMIN_PORT}
 
 	frankenphp {
-		worker "{$APP_PUBLIC_PATH}/frankenphp-worker.php" {$CADDY_SERVER_WORKER_COUNT}
+		worker {
+			file "{$APP_PUBLIC_PATH}/frankenphp-worker.php"
+			{$CADDY_SERVER_WORKER_DIRECTIVE}
+			{$CADDY_SERVER_WATCH_DIRECTIVES}
+		}
 	}
 }
+
+{$CADDY_EXTRA_CONFIG}
 
 {$CADDY_SERVER_SERVER_NAME} {
 	log {
@@ -18,16 +24,19 @@
 		format filter {
 			wrap {$CADDY_SERVER_LOGGER}
 			fields {
-				uri query {
+				request>uri query {
 					replace authorization REDACTED
 				}
 			}
 		}
 	}
 
+	# Compressing the Mercure stream costs memory per subscriber and enables BREACH-style attacks...
+	@compressible not path /.well-known/mercure
+
 	route {
 		root * "{$APP_PUBLIC_PATH}"
-		encode zstd br gzip
+		encode @compressible zstd br gzip
 
 		@redirect_checkout path_regexp checkout /wordpress/checkout/order-received/(\d+)
 		handle @redirect_checkout {
@@ -76,6 +85,7 @@
 
 		php_server {
 			index frankenphp-worker.php
+			try_files {path} frankenphp-worker.php
 			# Required for the public/storage/ directory...
 			resolve_root_symlink
 		}

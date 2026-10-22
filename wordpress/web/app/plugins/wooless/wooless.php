@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Wooless
  * Version: 1.0.0
- * Author: koncewicz.io
+ * Author: koncewicz.pl
  */
 
 if (!defined('ABSPATH')) {

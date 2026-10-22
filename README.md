@@ -17,21 +17,26 @@ Mobile-first, self-hosted and simple WooCommerce Headless solution, which adapte
 
 ## Production deployment
 
-Before starting the project on a production server, replace `localhost` with your production domain in the following files:
+The public domain lives only in the two `.env` files; nothing under `docker/` or in the scripts
+needs editing on the server:
 
-* `app/.env` — set `APP_URL` to `https://your-domain.tld`
-* `wordpress/.env` — set `WP_HOME` to `https://your-domain.tld/wordpress` (`WP_SITEURL` is derived from it)
-* `docker/app/supervisord.conf` — replace `--host=localhost` in the `octane:frankenphp` command with `--host=your-domain.tld`
-* `install.sh` — set `WORDPRESS_URL` to `https://your-domain.tld/wordpress`
+* `app/.env` — set `OCTANE_HOST` to `your-domain.tld` (a comma-separated list serves several
+  domains, Caddy obtains a certificate for each) and `APP_URL` to `https://your-domain.tld`
+* `wordpress/.env` — set `WP_HOME` to `https://your-domain.tld/wordpress` (`WP_SITEURL` is derived
+  from it) and the `WP_ADMIN_*` values for the administrator account that `install.sh` creates
 
-After updating these values, rebuild the app image and bring the stack up:
+Caddy listens on ports 80 and 443 and redirects HTTP to HTTPS. After updating these values, build
+the images and bring the stack up:
 
 ```bash
 ./create-network.sh   # only the first time
 ./build.sh
 ./up.sh
-./install.sh          # only the first time — seeds WordPress
+./install.sh          # only the first time — seeds WordPress with the account from wordpress/.env
 ```
+
+After a later change of `OCTANE_HOST` run `./bin/app php artisan config:cache` and
+`docker exec wooless-app supervisorctl restart octane`.
 
 ## Local tunnel (ngrok)
 

@@ -1,6 +1,6 @@
 ---
 name: deploy
-description: Deploy a Wooless release tag to the production server (sklep.wooless.pl) and verify it — pull the tag, keep the server's production-only edits, rebuild images only when the Dockerfiles changed, run Composer/npm installs, database migrations, restart Octane/SSR/FrankenPHP and smoke-test the shop. Use this whenever the user asks to deploy, release, roll out, publish, push to production, update the server, or roll back to a previous version, including right after an upgrade or a hotfix commit.
+description: Deploy a Wooless release tag to the production server (sklep.wooless.pl) and verify it — pull the tag, rebuild images only when the Dockerfiles changed, run Composer/npm installs, database migrations, restart Octane/SSR/FrankenPHP and smoke-test the shop. Use this whenever the user asks to deploy, release, roll out, publish, push to production, update the server, or roll back to a previous version, including right after an upgrade or a hotfix commit.
 ---
 
 # Deploy
@@ -22,10 +22,10 @@ that exists on `origin`. `--rollback` means the tag before the one currently dep
 2. Read the CHANGELOG section for that tag. Anything under *Removed* that is a WordPress plugin must
    be deactivated on the server before `composer install` deletes its files; the script does this
    automatically by diffing `wordpress/composer.json`, but know that it is going to happen.
-3. Remember the production-only edits that live uncommitted on the server and must survive:
-   port 80 in `docker-compose.yml`, `--host=sklep.wooless.pl --http-redirect` in
-   `docker/app/supervisord.conf`, the production values in `install.sh`. The script stashes
-   and re-applies them; a conflict there stops the script and is resolved by hand.
+3. The server has no uncommitted edits: everything environment-specific (the public domain,
+   accounts, keys) lives in the untracked `.env` files, see `README.md`. The script refuses to
+   deploy over a dirty working tree, so a dirty `git status` on the server means somebody edited
+   a tracked file by hand — find out why before deploying.
 
 ## Deploying
 
@@ -38,8 +38,8 @@ Always copy the script and run it from a file. Feeding it through `ssh 'bash -s'
 silently stops after the first `./bin/wordpress` or `./bin/app` call, because those wrap
 `docker exec -i`, which reads the rest of the script from stdin.
 
-What the script does, in order: deactivates plugins the release removes, stashes the production
-edits, checks out the tag (detached HEAD), restores the edits, then either rebuilds images and
+What the script does, in order: deactivates plugins the release removes, checks that the working
+tree is clean, checks out the tag (detached HEAD), then either rebuilds images and
 restarts the whole stack (`./build.sh && ./down.sh && ./up.sh`, only if `docker/` or
 `docker-compose.yml` changed) or just runs the installs, the Vite build, config/route cache and
 `supervisorctl restart octane ssr`. Then `wp core update-db`, `wp wc update`, process status, and
@@ -67,8 +67,7 @@ it at the same time. A full rebuild means a few minutes of downtime during
   (`/checkout/order/<id>?key=…`) is where a Guzzle 8 regression surfaced as a 500 in October 2026
   while every happy-path page was green.
 - Report: the tag now live (`git describe --tags`), what changed (from the CHANGELOG), the smoke-test
-  results, and anything left uncommitted on the server (`git status --short` should list only the
-  three production-edit files).
+  results, and anything left uncommitted on the server (`git status --short` should be empty).
 
 ## Rollback
 

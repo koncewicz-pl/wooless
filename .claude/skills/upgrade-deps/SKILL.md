@@ -169,9 +169,10 @@ Laravel:
 docker exec wooless-app supervisorctl restart octane ssr   # the one docker exec exception: supervisor's socket is root-only, same as in up.sh
 curl -sk -o /dev/null -w '%{http_code}\n' https://localhost/
 curl -sk -o /dev/null -w '%{http_code}\n' https://localhost/wordpress/wp-json/wc/store/v1/products
+curl -s -o /dev/null -w '%{http_code}\n' http://localhost/
 ```
 
-Both URLs should return 200. Add the shop pages the Laravel app serves itself:
+The two HTTPS URLs should return 200 and the HTTP one 308 (Caddy's redirect to HTTPS). Add the shop pages the Laravel app serves itself:
 `https://localhost/products`, `https://localhost/products/<slug>` (take `slug` of the first product
 from the Store API response; the WordPress `permalink` is not a frontend URL) and
 `https://localhost/posts`. Then look for deprecations the new PHP/Laravel/Vue surfaced:
@@ -192,6 +193,19 @@ The feature tests render Inertia pages through the running SSR server with parti
 so `SSR ERROR Cart/Index … reading 'length'` lines in `docker logs wooless-app` whose timestamps
 match the test run are noise. Judge SSR by curling real pages afterwards and confirming the error
 counter in the logs does not move.
+
+After an Octane bump compare the published files with the new stubs:
+
+```bash
+diff app/vendor/laravel/octane/src/Commands/stubs/Caddyfile app/Caddyfile
+diff app/vendor/laravel/octane/config/octane.php app/config/octane.php
+```
+
+`app/Caddyfile` is the stub plus `skip_install_trust` and the WordPress proxy block (`@redirect_checkout`,
+`@allow`/`@deny`, `reverse_proxy`), so carry new stub lines over and keep that block. **`app/config/octane.php`
+must not be overwritten**: right under `'server'` it has a project-specific `'port' => 443` and a
+`'caddy' => ['env' => [...]]` block that builds the Caddy site address from `OCTANE_HOST` (see `CLAUDE.md`,
+"Server domain"); add only new keys from the stub. A Caddyfile change needs the Octane restart above.
 
 Fix what you find in project code (not in `vendor/`). Past examples are in
 `references/past-upgrades.md` — a PHP minor bump renamed PDO constants, a WooCommerce bump deprecated

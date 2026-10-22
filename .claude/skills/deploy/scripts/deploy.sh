@@ -29,11 +29,11 @@ for plugin in $(removed_plugins); do
   echo "deactivating $plugin"; ./bin/wordpress vendor/bin/wp plugin deactivate "$plugin" || true
 done
 
-echo "== 2/6 checkout $TAG, keeping the production-only edits"
-git stash push -q -m "prod-local-edits-$(date +%F-%H%M)" || true
+echo "== 2/6 checkout $TAG (environment-specific values live in the .env files, the tree must be clean)"
+if [ -n "$(git status --short --untracked-files=no)" ]; then
+  echo "!! tracked files were edited on the server, refusing to deploy over them:"; git status --short --untracked-files=no; exit 1
+fi
 git checkout -q --detach "$TAG"
-git stash pop -q || { echo "!! stash pop conflict: resolve by hand (git status), production edits are in the stash"; exit 1; }
-git status --short
 
 if ! git diff --quiet "$PREV" "$TAG" -- docker/ docker-compose.yml; then
   echo "== 3/6 Dockerfiles or compose changed: rebuild and restart the stack"

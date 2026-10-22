@@ -1,11 +1,25 @@
 #!/bin/bash
 set -e
 
-WORDPRESS_URL="https://localhost/wordpress"
 WORDPRESS_TITLE="Wooless Shop"
-WORDPRESS_ADMIN_USER="wordpress"
-WORDPRESS_ADMIN_PASSWORD="secret"
-WORDPRESS_ADMIN_EMAIL="marek@koncewicz.io"
+
+# The site URL and the administrator account come from wordpress/.env (WP_HOME, WP_ADMIN_*),
+# so a production install needs no edits in this file and the credentials stay readable later.
+wordpress_env() {
+  sed -n "s/^$1=['\"]\{0,1\}\([^'\"]*\)['\"]\{0,1\}\s*$/\1/p" wordpress/.env | tail -n 1
+}
+
+WORDPRESS_URL=$(wordpress_env WP_HOME)
+WORDPRESS_ADMIN_USER=$(wordpress_env WP_ADMIN_USER)
+WORDPRESS_ADMIN_PASSWORD=$(wordpress_env WP_ADMIN_PASSWORD)
+WORDPRESS_ADMIN_EMAIL=$(wordpress_env WP_ADMIN_EMAIL)
+
+for name in WORDPRESS_URL WORDPRESS_ADMIN_USER WORDPRESS_ADMIN_PASSWORD WORDPRESS_ADMIN_EMAIL; do
+  if [ -z "${!name}" ]; then
+    echo "$name is empty: set WP_HOME and WP_ADMIN_USER / WP_ADMIN_PASSWORD / WP_ADMIN_EMAIL in wordpress/.env (see wordpress/.env.example)."
+    exit 1
+  fi
+done
 
 WP="./bin/wordpress vendor/bin/wp"
 

@@ -8,6 +8,25 @@ Releases are git tags (`vX.Y.Z`); production runs a tag, never a bare branch.
 
 ## [Unreleased]
 
+### Changed
+- The public domain is configured only in `.env`: `OCTANE_HOST` in `app/.env` (one domain or a
+  comma-separated list) feeds the Caddy site address through `config/octane.php`, and the supervisor
+  command is a bare `octane:frankenphp --caddyfile=…` with no `--host`/`--port`/`--https`. Caddy now
+  also listens on port 80 and redirects HTTP to HTTPS, so production no longer needs uncommitted
+  edits in `docker/app/supervisord.conf` or `docker-compose.yml`.
+- `install.sh` reads the site URL (`WP_HOME`) and the administrator account (new `WP_ADMIN_USER`,
+  `WP_ADMIN_PASSWORD`, `WP_ADMIN_EMAIL`) from `wordpress/.env` instead of hard-coding them.
+- `app/Caddyfile` follows the current Octane stub (worker block, `CADDY_EXTRA_CONFIG`, `try_files`)
+  with the WordPress proxy block kept.
+- `phpunit.xml` uses separate config, route and event cache paths so tests ignore the cache made by `up.sh`.
+- The deploy script refuses a dirty working tree instead of stashing production edits.
+- E-mail placeholders in the checkout, login and register forms and the Wooless plugin author use the
+  `koncewicz.pl` domain instead of the retired `koncewicz.io`.
+
+### Removed
+- `App\Console\Commands\StartFrankenPhpCommand`: the WordPress proxy variables are passed through
+  Octane's own `octane.caddy.env` configuration.
+
 ## [2.3.0] - 2026-10-21
 
 ### Changed

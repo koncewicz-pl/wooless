@@ -22,3 +22,13 @@ Headless WordPress project. WordPress serves as the backend (CMS + REST API), La
 Frontend application has a dedicated Laravel Boost MCP server. Always use the correct server for the application you are working on:
 
 - **App** → `laravel-boost-app` MCP server (tools prefixed `mcp__laravel-boost-app__`)
+
+## Server domain
+
+The port, the Caddy site address and the HTTP→HTTPS redirect (empty `CADDY_GLOBAL_OPTIONS`, port 80 in `docker-compose.yml`) are set in `app/config/octane.php` (`port`, `caddy.env`); the domains come from `OCTANE_HOST` at the top of `app/.env` (one domain or a comma-separated list), parsed by `App\Services\OctaneHosts`. The same block passes `WORDPRESS_CONTAINER_URL` and `WORDPRESS_HOST` (first domain, sent to WordPress as `X-Forwarded-Host`) to the WordPress proxy in `app/Caddyfile`. `APP_URL` is set explicitly. Supervisor runs `php artisan octane:frankenphp --caddyfile=/var/www/Caddyfile` with no `--host`/`--port`/`--https`; production therefore has no uncommitted edits in `docker/` or the scripts. Locally `OCTANE_HOST=localhost`; after changing it run `./bin/app php artisan config:cache` and `docker exec wooless-app supervisorctl restart octane`.
+
+WordPress has its own domain in `wordpress/.env` (`WP_HOME`), together with the `WP_ADMIN_*` account that `install.sh` creates.
+
+## Tests
+
+`app/phpunit.xml` points to separate (non-existent) config, route and event cache paths, so `./bin/app php artisan test --compact` works even when `up.sh` has cached the config in the running container.
