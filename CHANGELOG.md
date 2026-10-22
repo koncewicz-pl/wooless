@@ -8,6 +8,10 @@ Releases are git tags (`vX.Y.Z`); production runs a tag, never a bare branch.
 
 ## [Unreleased]
 
+### Changed
+- `APP_URL` in `app/.env.example` is derived from `OCTANE_HOST` (`"https://${OCTANE_HOST}"`), so the
+  domain is written once.
+
 ## [2.5.0] - 2026-10-22
 
 ### Changed

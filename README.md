@@ -20,7 +20,7 @@ Mobile-first, self-hosted and simple WooCommerce Headless solution, which adapte
 The public domain lives only in the two `.env` files; nothing under `docker/` or in the scripts
 needs editing on the server:
 
-* `app/.env` — set `OCTANE_HOST` to `your-domain.tld` and `APP_URL` to `https://your-domain.tld`.
+* `app/.env` — set `OCTANE_HOST` to `your-domain.tld` (`APP_URL` is derived from it).
   `OCTANE_REDIRECT_HOSTS` lists the aliases that redirect to the main domain (comma-separated;
   empty means `www.your-domain.tld`). Caddy obtains a certificate for the main domain and for every
   alias, so each of them needs a DNS record pointing at the server
